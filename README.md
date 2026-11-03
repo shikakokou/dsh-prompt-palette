@@ -49,11 +49,9 @@ dsh plugin --profile web add "file:/home/you/dsh-prompt-palette"
 ```bash
 pnpm install
 pnpm typecheck   # tsc --noEmit
-pnpm test        # node --test，18 例
+pnpm test        # vitest run
 pnpm build       # 产出 dist/client.js
 ```
-
-测试是 `node --test` 的纯逻辑用例（`tests/`），覆盖草稿追加、已插入判定、搜索、导入合并、上限校验、本地存储、浮窗定位。
 
 ### 结构
 
