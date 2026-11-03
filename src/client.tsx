@@ -6,7 +6,7 @@ import { exportStore, importStore, loadStore, saveStore } from './storage.ts'
 import seed from './seed.json'
 import zh from './locales/zh.json'
 import en from './locales/en.json'
-import { styles } from './styles.ts'
+import styles from './styles.css?raw'
 import { Editor } from './editor.tsx'
 import type {
   ClientContext,
@@ -159,13 +159,11 @@ function PromptPanel({
       const element = panel.current
       const rect = anchor.current?.getBoundingClientRect()
       if (!element || !rect) return
-      // Measure the card unclamped: the list absorbs the previous cap, so its
-      // scrollHeight would keep reporting the capped size and a window that
-      // grows back would never give the card its height back.
-      const capped = element.style.maxHeight
-      element.style.maxHeight = 'none'
-      const height = element.offsetHeight
-      element.style.maxHeight = capped
+      let height = element.offsetHeight
+      for (const child of Array.from(element.children)) {
+        if (!(child instanceof HTMLElement)) continue
+        height += Math.max(0, child.scrollHeight - child.clientHeight)
+      }
       const next = computePlacement(
         { top: rect.top, bottom: rect.bottom, right: rect.right },
         { width: element.offsetWidth, height },
@@ -181,15 +179,20 @@ function PromptPanel({
       )
     }
     place()
+    const onScroll = (event: Event): void => {
+      if (event.target instanceof Node && panel.current?.contains(event.target) === true) {
+        return
+      }
+      place()
+    }
     window.addEventListener('resize', place)
-    window.addEventListener('scroll', place, true)
-    // Filtering, editing and switching locale all change the card's height.
+    window.addEventListener('scroll', onScroll, true)
     const observer =
       typeof ResizeObserver === 'function' ? new ResizeObserver(place) : null
     if (panel.current !== null) observer?.observe(panel.current)
     return () => {
       window.removeEventListener('resize', place)
-      window.removeEventListener('scroll', place, true)
+      window.removeEventListener('scroll', onScroll, true)
       observer?.disconnect()
     }
   }, [anchor])
@@ -199,7 +202,6 @@ function PromptPanel({
     [store.items]
   )
 
-  // The footer and the create button show the same ceiling the model enforces.
   const full = store.items.length >= LIMITS.items
 
   const visible = useMemo(
@@ -217,8 +219,6 @@ function PromptPanel({
   const insert = (prompt: Prompt) => {
     if (!inputActions) return
     inputActions.setDraft(appendPrompt(input.draft, prompt.body))
-    // One pick is one intent: hand the palette back rather than leaving it
-    // open over the draft the user is about to edit.
     onClose()
   }
 
