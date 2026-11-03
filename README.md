@@ -4,6 +4,16 @@ dsh-prompt-palette 是一个 DSH Web 插件，用面板管理常用提示词。�
 
 面板从 composer 右侧的按钮打开，以浮层形式显示。条目保存在浏览器的 `localStorage` 中，不离开本机。
 
+## 预览
+
+点输入框右侧的提示词按钮打开面板，条目支持搜索、复制、编辑和删除：
+
+![提示词面板](docs/images/panel.png)
+
+编辑条目时填写名称、正文和标签，正文即插入草稿的内容：
+
+![编辑条目](docs/images/edit.png)
+
 ## 安装
 
 插件的前端入口 `dist/client.js` 是构建产物，仓库里放的是源码，因此需要先 clone 并构建一次：
